@@ -1,0 +1,16 @@
+# Local development: dev-signed tokens (POST /dev/token), stub DPE on 9191, batch export to ./exports.
+rewards:
+  dpe:
+    target: localhost:9191
+    plaintext: true
+    stub-enabled: true
+  batch:
+    enabled: true
+    cron: "0 */5 * * * *"              # every 5 minutes locally
+  security:
+    # DEV ONLY. Base64 of a 32-byte key. Never reuse outside your machine.
+    dev-secret: ${DEV_JWT_SECRET:cmV3YXJkcy1pcS1sb2NhbC1kZXYtb25seS1zZWNyZXQtMzI=}
+
+logging:
+  level:
+    com.rewardsiq: DEBUG

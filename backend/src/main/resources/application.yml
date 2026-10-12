@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: rewards-iq
+  data:
+    mongodb:
+      # Must be a replica set: approval writes rule + outbox + audit in one transaction.
+      uri: ${MONGODB_URI:mongodb://localhost:27017/rewardsiq?directConnection=true}
+      auto-index-creation: true
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Real environments: the identity provider's issuer (keys come from its JWKS endpoint).
+          issuer-uri: ${OIDC_ISSUER_URI:}
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,mongo,rulesCache
+
+rewards:
+  publish:
+    mode: ${PUBLISH_MODE:REALTIME}     # REALTIME (gRPC to DPE) or BATCH (Plan B file)
+    poll-interval: PT5S          # ISO-8601: @Scheduled needs this form
+    max-attempts: 6
+    base-backoff: 30s
+    batch-size: 50
+  batch:
+    enabled: ${BATCH_EXPORT_ENABLED:false}
+    directory: ${BATCH_EXPORT_DIR:./exports}
+    cron: "0 0 */2 * * *"              # every 2 hours, UTC
+  grpc:
+    enabled: true
+    port: ${GRPC_PORT:9090}
+  dpe:
+    target: ${DPE_TARGET:dpe.internal:443}
+    plaintext: false
+    deadline: 2s
+    service-token: ${DPE_SERVICE_TOKEN:}
+    stub-enabled: false
+    stub-port: 9191
+  cache:
+    refresh-interval: PT60S
+  security:
+    dev-secret: ${DEV_JWT_SECRET:}
+    audience: rewards-iq
+    pricing-scope: rewardsiq.pricing
+
+logging:
+  level:
+    com.rewardsiq: INFO

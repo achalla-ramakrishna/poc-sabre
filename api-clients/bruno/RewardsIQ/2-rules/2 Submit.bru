@@ -1,0 +1,23 @@
+meta {
+  name: 2 Submit
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/rules/{{ruleId}}/submit
+  body: none
+  auth: bearer
+}
+
+headers {
+  If-Match: {{etag}}
+}
+
+auth:bearer {
+  token: {{analystToken}}
+}
+
+script:post-response {
+  bru.setEnvVar("etag", res.headers.etag);
+}

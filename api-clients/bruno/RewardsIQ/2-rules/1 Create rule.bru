@@ -1,0 +1,41 @@
+meta {
+  name: 1 Create rule
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/rules
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{analystToken}}
+}
+
+body:json {
+  {
+    "name": "SYD-PER Economy Choice",
+    "scope": {
+      "origins": ["SYD"], "destinations": ["PER"], "cabins": ["ECONOMY"],
+      "fareBrands": ["CHOICE"], "bundles": [], "pointsOfSale": ["AU"]
+    },
+    "rates": [ { "fareBrand": "CHOICE", "pointsPerUnit": "47.8", "currency": "AUD", "roundingStep": 100 } ],
+    "limits": { "maxRedeemPercent": 70, "minPoints": 5000 },
+    "effectiveFrom": "2026-10-01",
+    "effectiveTo": "2027-03-31"
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("ruleId", res.body.ruleId);
+  bru.setEnvVar("etag", res.headers.etag);
+}
+
+tests {
+  test("201 DRAFT", () => {
+    expect(res.status).to.equal(201);
+    expect(res.body.status).to.equal("DRAFT");
+  });
+}

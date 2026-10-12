@@ -1,0 +1,7 @@
+backend/target/
+backend/logs/
+backend/exports/
+exports/
+.idea/
+*.iml
+.DS_Store

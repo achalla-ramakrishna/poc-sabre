@@ -1,0 +1,19 @@
+meta {
+  name: Approver token
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/dev/token
+  body: json
+  auth: none
+}
+
+body:json {
+  { "subject": "u-approver", "airline": "VA", "roles": ["APPROVER", "VIEWER"] }
+}
+
+script:post-response {
+  bru.setEnvVar("approverToken", res.body.accessToken);
+}

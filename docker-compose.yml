@@ -1,0 +1,24 @@
+# Optional: everything in containers. If you already run MongoDB locally, you only need the backend.
+services:
+  mongo:
+    image: mongo:7.0
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports: ["27017:27017"]
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval",
+             "try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}).ok }"]
+      interval: 5s
+      retries: 20
+
+  rewards-iq:
+    build: ./backend
+    ports: ["8080:8080", "9090:9090"]
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MONGODB_URI: mongodb://mongo:27017/rewardsiq?replicaSet=rs0
+    depends_on:
+      mongo: { condition: service_healthy }
+
+volumes:
+  mongo-data:

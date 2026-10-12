@@ -1,0 +1,31 @@
+meta {
+  name: Preview live rules
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/preview
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{analystToken}}
+}
+
+body:json {
+  {
+    "ruleSet": "LIVE",
+    "origin": "SYD", "destination": "PER", "cabin": "ECONOMY",
+    "fareBrand": "CHOICE", "pointOfSale": "AU",
+    "fareAmount": "900.00", "currency": "AUD",
+    "memberBalance": 100000
+  }
+}
+
+tests {
+  test("43,100 points", () => {
+    expect(res.body.pointsRequired).to.equal(43100);
+  });
+}

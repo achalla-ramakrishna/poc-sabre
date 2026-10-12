@@ -1,0 +1,15 @@
+meta {
+  name: 5 History (audit + DPE publications)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/rules/{{ruleId}}/history
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{analystToken}}
+}

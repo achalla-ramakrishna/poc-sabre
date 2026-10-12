@@ -1,0 +1,26 @@
+meta {
+  name: 3 Approve
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/rules/{{ruleId}}/approve
+  body: none
+  auth: bearer
+}
+
+headers {
+  If-Match: {{etag}}
+}
+
+auth:bearer {
+  token: {{approverToken}}
+}
+
+tests {
+  test("202 APPROVED, queued for DPE", () => {
+    expect(res.status).to.equal(202);
+    expect(res.body.status).to.equal("APPROVED");
+  });
+}

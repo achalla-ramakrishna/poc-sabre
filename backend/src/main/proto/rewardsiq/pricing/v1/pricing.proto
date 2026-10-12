@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+// Called by the Dynamic Pricing Engine (DPE) while a traveller shops (INT-2).
+package rewardsiq.pricing.v1;
+
+option java_multiple_files = true;
+option java_package = "com.rewardsiq.grpc.pricing.v1";
+
+import "rewardsiq/publish/v1/publish.proto";
+
+service RedemptionPricing {
+  rpc PriceOffers (PriceOffersRequest) returns (PriceOffersResponse);
+}
+
+message PriceOffersRequest {
+  string airline = 1;                 // "VA"
+  repeated Offer offers = 2;          // up to 50 per call
+  optional int64 member_balance = 3;  // used in memory only, never stored or logged
+}
+
+message Offer {
+  string offer_id = 1;
+  string origin = 2;
+  string destination = 3;
+  string travel_date = 4;             // YYYY-MM-DD
+  rewardsiq.publish.v1.Cabin cabin = 5;
+  string fare_brand = 6;
+  string bundle = 7;
+  string point_of_sale = 8;           // 2-letter country
+  Money fare = 9;
+}
+
+message Money {
+  string amount = 1;                  // decimal string, never float
+  string currency = 2;
+}
+
+message PriceOffersResponse {
+  repeated OfferPoints results = 1;
+}
+
+message OfferPoints {
+  string offer_id = 1;
+  bool cash_only = 2;
+  int64 points_required = 3;
+  int64 points_usable = 4;            // 0 when no balance was supplied
+  string rule_id = 5;
+  int32 rule_version = 6;
+}

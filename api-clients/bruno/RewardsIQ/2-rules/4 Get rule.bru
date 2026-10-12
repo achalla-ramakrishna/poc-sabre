@@ -1,0 +1,15 @@
+meta {
+  name: 4 Get rule (PUBLISHED after a few seconds)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/rules/{{ruleId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{analystToken}}
+}

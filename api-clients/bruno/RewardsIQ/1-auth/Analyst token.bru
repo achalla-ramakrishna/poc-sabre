@@ -1,0 +1,19 @@
+meta {
+  name: Analyst token
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/dev/token
+  body: json
+  auth: none
+}
+
+body:json {
+  { "subject": "u-analyst", "airline": "VA", "roles": ["ANALYST", "VIEWER"] }
+}
+
+script:post-response {
+  bru.setEnvVar("analystToken", res.body.accessToken);
+}

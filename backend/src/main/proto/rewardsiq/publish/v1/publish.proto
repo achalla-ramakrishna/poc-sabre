@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+// Implemented by DPE; Rewards IQ is the client (INT-1). Proposed contract until DPE shares theirs.
+package rewardsiq.publish.v1;
+
+option java_multiple_files = true;
+option java_package = "com.rewardsiq.grpc.publish.v1";
+
+import "google/protobuf/timestamp.proto";
+
+service RedemptionRuleSink {
+  rpc UpsertRule (UpsertRuleRequest) returns (RuleAck);
+  rpc RetireRule (RetireRuleRequest) returns (RuleAck);
+}
+
+enum Cabin {
+  CABIN_UNSPECIFIED = 0;
+  ECONOMY = 1;
+  PREMIUM_ECONOMY = 2;
+  BUSINESS = 3;
+  FIRST = 4;
+}
+
+message UpsertRuleRequest {
+  string idempotency_key = 1;
+  RedemptionRule rule = 2;
+}
+
+message RetireRuleRequest {
+  string idempotency_key = 1;
+  string airline = 2;
+  string rule_id = 3;
+  int32 version = 4;
+}
+
+message RedemptionRule {
+  string airline = 1;
+  string rule_id = 2;
+  int32 version = 3;
+  Scope scope = 4;
+  repeated Rate rates = 5;
+  int32 max_redeem_percent = 6;
+  int64 min_points = 7;
+  string effective_from = 8;          // YYYY-MM-DD
+  string effective_to = 9;            // empty = open-ended
+  int32 specificity = 10;
+  google.protobuf.Timestamp approved_at = 11;
+}
+
+message Scope {
+  repeated string origins = 1;
+  repeated string destinations = 2;
+  repeated Cabin cabins = 3;
+  repeated string fare_brands = 4;
+  repeated string bundles = 5;
+  repeated string points_of_sale = 6;
+}
+
+message Rate {
+  string fare_brand = 1;              // empty = applies to any fare brand in scope
+  string points_per_unit = 2;         // decimal string
+  string currency = 3;
+  int32 rounding_step = 4;
+}
+
+message RuleAck {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    ACCEPTED = 1;
+    DUPLICATE = 2;
+  }
+  Result result = 1;
+  string dpe_reference = 2;
+}
