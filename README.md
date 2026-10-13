@@ -14,6 +14,9 @@ those rules to the Dynamic Pricing Engine (DPE) so travellers see prices like
 - **DPE prices offers** by calling the **gRPC** `RedemptionPricing` service, which answers from an
   in-memory rules cache and never touches the database on the shopping path.
 
+Frontend: React 18 + TypeScript (Vite) in `frontend/`: sign-in, rule list, rule editor with
+approval actions, preview and history, and a standalone preview page.
+
 Stack: Java 17 · Spring Boot 3.3 · Spring Security (OAuth2 resource server / JWT) · MongoDB ·
 gRPC + Protocol Buffers · JUnit 5 · Mockito · Spock · Testcontainers.
 
@@ -59,7 +62,21 @@ Ports: REST on **8080**, gRPC pricing on **9090**. Readiness:
 `curl localhost:8080/actuator/health/readiness` returns `UP` once MongoDB is reachable and the rules
 cache has loaded.
 
-### 3. Try the flow
+### 3. Start the frontend
+
+```bash
+cd frontend
+npm install
+npm run dev        # http://localhost:5173 (calls the backend on :8080 through the Vite proxy)
+```
+
+Sign in as **Loyalty analyst**, create a rule (e.g. Origins `SYD`, Destinations `PER`,
+Fare brands `CHOICE`, rate `47.8` AUD, 70%), save it and **Submit for approval**. Sign out, sign in as
+**Loyalty approver**, open the rule and **Approve**. Within a few seconds it shows **Live**, with the DPE
+acknowledgement under *DPE publications*. On **Preview**, SYD to PER at AUD 900 shows
+**43,100 points**.
+
+### 4. Or try the API directly
 
 Open `api-clients/bruno/RewardsIQ` in [Bruno](https://www.usebruno.com/), pick the `local`
 environment, and run the requests in order:
@@ -95,6 +112,9 @@ No local MongoDB? `docker compose up --build` starts a replica-set MongoDB and t
 ## Tests
 
 ```bash
+cd frontend
+npm run test:e2e   # Playwright: 5 browser tests against a stateful fake API (no backend needed)
+
 cd backend
 mvn test     # 60 unit, web-slice, gRPC in-process and Spock tests
 mvn verify   # + RewardsIqFlowIT end to end against MongoDB in Docker (skipped without Docker) + JaCoCo
